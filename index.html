@@ -32,19 +32,20 @@ body { margin: 0; background: var(--room); font-family: var(--sans); display: gr
 .face.back { transform: rotateY(180deg) }
 /* the one shared mark of both faces: a mint panel on the right edge */
 .panel { position: absolute; right: 0; top: 0; bottom: 0; width: 34%; background: var(--mint); color: var(--ink) }
-.turn { position: absolute; left: 6cqw; bottom: 6cqw; display: inline-flex; align-items: center; gap: 1.4cqw; padding: 0; border: 0; background: none; cursor: pointer;
+.turn { display: inline-flex; align-items: center; gap: 1.4cqw; padding: 0; border: 0; background: none; cursor: pointer;
   font: 500 1.9cqw var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--paper-3) }
 .turn svg { width: 2.4cqw; height: 2.4cqw }
 .turn:hover { color: var(--paper) }
 a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline-offset: .6cqw; border-radius: .6cqw }
 
 /* ---------- front ---------- */
-.lockup { position: absolute; left: 6cqw; top: 6.5cqw; display: flex; align-items: center; gap: 2.4cqw }
+.stack { position: absolute; left: 6cqw; top: 6cqw; bottom: 6cqw; right: calc(34% + 4cqw); display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between }
+.lockup { display: flex; align-items: center; gap: 2.4cqw }
 .lockup svg { width: 7.4cqw; height: 7.4cqw; flex: none }
 .word { margin: 0; font: 800 6.2cqw/1 var(--display); letter-spacing: -.02em }
-.claim { position: absolute; left: 6cqw; top: 22cqw; margin: 0; width: 52%; font: 600 3.9cqw/1.18 var(--display); letter-spacing: -.01em; text-wrap: balance }
+.claim { margin: 0 0 3.6cqw; font: 600 4.4cqw/1.16 var(--display); letter-spacing: -.01em; text-wrap: balance }
 .claim em { font-style: normal; color: var(--mint) }
-.site { position: absolute; left: 6cqw; top: 37cqw; display: inline-flex; align-items: center; gap: 1.2cqw; color: var(--paper); text-decoration: none;
+.site { display: inline-flex; align-items: center; gap: 1.2cqw; color: var(--paper); text-decoration: none;
   font: 500 2.5cqw var(--mono); padding-bottom: .4cqw; border-bottom: .25cqw solid var(--mint) }
 .site svg { width: 2.4cqw; height: 2.4cqw; color: var(--mint) }
 .site:hover { color: var(--mint) }
@@ -63,10 +64,9 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
   font: 500 1.9cqw var(--mono); letter-spacing: .02em; border: .25cqw solid rgb(255 255 255 / .22); transition: background-color .2s ease, color .2s ease, border-color .2s ease }
 .icons a:hover { background: var(--mint); border-color: var(--mint); color: var(--ink) }
 .back .panel { display: flex; flex-direction: column; justify-content: space-between; padding: 5.5cqw 4.6cqw }
-.back .panel .lockup { position: static }
-.back .panel .lockup { gap: 1.6cqw }
-.back .panel .lockup svg { width: 5cqw; height: 5cqw }
-.back .panel .word { font-size: 3.8cqw }
+.back .panel .lockup { gap: 1.4cqw }
+.back .panel .lockup svg { width: 4.4cqw; height: 4.4cqw }
+.back .panel .word { font-size: 3.4cqw }
 .team-title { margin: 0; font: 800 5.4cqw/1 var(--display); letter-spacing: -.02em }
 .team-title span { display: block; margin-top: 1.4cqw; font: 500 1.9cqw var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--mint-deep) }
 .back .site { position: static; color: var(--ink); border-bottom-color: var(--ink); font-size: 2.3cqw; align-self: flex-start }
@@ -97,10 +97,12 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
 <div class="scene" id="scene">
   <div class="card">
     <section class="face front" aria-label="Mergit">
-      <div class="lockup"><svg aria-hidden="true"><use href="#mg"/></svg><p class="word">Mergit</p></div>
-      <p class="claim">AI agents that do real work. <em>Proof you can verify.</em></p>
-      <a class="site" href="https://app.mergit.site" target="_blank" rel="noopener">app.mergit.site<svg aria-hidden="true"><use href="#i-out"/></svg></a>
-      <button class="turn" type="button" data-turn>Meet the team <svg aria-hidden="true"><use href="#i-turn"/></svg></button>
+      <div class="stack">
+        <div class="lockup"><svg aria-hidden="true"><use href="#mg"/></svg><p class="word">Mergit</p></div>
+        <div><p class="claim">AI agents that<br>do real work.<br><em>Proof you can verify.</em></p>
+        <a class="site" href="https://app.mergit.site" target="_blank" rel="noopener">app.mergit.site<svg aria-hidden="true"><use href="#i-out"/></svg></a></div>
+        <button class="turn" type="button" data-turn>Meet the team <svg aria-hidden="true"><use href="#i-turn"/></svg></button>
+      </div>
       <div class="panel"></div>
     </section>
     <section class="face back" aria-label="The Mergit team" aria-hidden="true">
