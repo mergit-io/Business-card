@@ -48,10 +48,6 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
   font: 500 2.5cqw var(--mono); padding-bottom: .4cqw; border-bottom: .25cqw solid var(--mint) }
 .site svg { width: 2.4cqw; height: 2.4cqw; color: var(--mint) }
 .site:hover { color: var(--mint) }
-.front .panel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4cqw }
-.qr { background: var(--paper); padding: 1.3cqw; border-radius: 1.8cqw; line-height: 0 }
-.qr img, .qr canvas { width: 17cqw !important; height: 17cqw !important; display: block }
-.panel small { font: 500 1.9cqw var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--mint-deep) }
 
 /* ---------- back: same stock, same mint panel, the team in place of the claim ---------- */
 .people { position: absolute; left: 6cqw; right: calc(34% + 4cqw); top: 4.6cqw; bottom: 4.6cqw; margin: 0; padding: 0; list-style: none;
@@ -105,7 +101,7 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
       <p class="claim">AI agents that do real work. <em>Proof you can verify.</em></p>
       <a class="site" href="https://app.mergit.site" target="_blank" rel="noopener">app.mergit.site<svg aria-hidden="true"><use href="#i-out"/></svg></a>
       <button class="turn" type="button" data-turn>Meet the team <svg aria-hidden="true"><use href="#i-turn"/></svg></button>
-      <div class="panel"><div class="qr" id="qr"></div><small>Scan · Base Sepolia</small></div>
+      <div class="panel"></div>
     </section>
     <section class="face back" aria-label="The Mergit team" aria-hidden="true">
       <ul class="people" id="people"></ul>
@@ -119,10 +115,7 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-// Where the printed card's QR points.
-const CARD_URL = "https://app.mergit.site";
 // The five members. Handles only; the links are built below.
 const TEAM = [
   { name: "Yash Virulkar",       role: "Co-founder", github: "viscous106",        x: "viscous106",      linkedin: "yash-virulkar" },
@@ -140,7 +133,6 @@ document.getElementById("people").innerHTML = TEAM.map((m) => `
       <a href="${link("https://www.linkedin.com/in/", m.linkedin)}" target="_blank" rel="noopener" aria-label="${m.name} on LinkedIn">LinkedIn</a>
     </span>
   </li>`).join("");
-if (window.QRCode) new QRCode(document.getElementById("qr"), { text: CARD_URL, width: 200, height: 200, colorDark: "#090b14", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
 
 const scene = document.getElementById("scene");
 const [front, back] = document.querySelectorAll(".face");
