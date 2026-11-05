@@ -31,8 +31,20 @@ body { margin: 0; background: var(--room); font-family: var(--sans); display: gr
   background: linear-gradient(150deg, var(--ink-2), var(--ink) 65%); color: var(--paper); cursor: pointer;
   box-shadow: 0 6cqw 9cqw -5cqw rgb(9 11 20 / .55), 0 .4cqw 1cqw rgb(9 11 20 / .18) }
 .face.back { transform: rotateY(180deg) }
-/* the one shared mark of both faces: a mint panel on the right edge */
+/* background layers, bottom to top: aurora glow, dot grid, the merge animation. All sit under the content. */
+.aura, .dots, .fx { position: absolute; pointer-events: none }
+.aura { inset: -25%; background:
+    radial-gradient(38% 46% at 18% 24%, rgb(127 230 192 / .22), transparent 70%),
+    radial-gradient(40% 52% at 84% 42%, rgb(95 140 255 / .24), transparent 70%),
+    radial-gradient(36% 46% at 62% 96%, rgb(184 169 255 / .26), transparent 70%);
+  animation: drift 16s ease-in-out infinite alternate }
+@keyframes drift { to { transform: translate3d(5%, -4%, 0) rotate(7deg) scale(1.1) } }
+.dots { inset: 0; background: radial-gradient(rgb(255 255 255 / .09) .14cqw, transparent .16cqw) 0 0 / 3.2cqw 3.2cqw;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); mask-image: linear-gradient(90deg, transparent, #000 70%) }
+.fx { inset: 0; width: 100%; height: 100% }
+/* the one shared mark of both faces: a panel on the right edge */
 .panel { position: absolute; right: 0; top: 0; bottom: 0; width: 34%; background: var(--mint); color: var(--ink) }
+.front .panel { background: linear-gradient(90deg, rgb(127 230 192 / 0), rgb(127 230 192 / .08)); border-left: .2cqw solid rgb(127 230 192 / .3) }
 .turn { display: inline-flex; align-items: center; gap: 1.4cqw; padding: 0; border: 0; background: none; cursor: pointer;
   font: 500 1.9cqw var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--paper-3) }
 .turn svg { width: 2.4cqw; height: 2.4cqw }
@@ -65,13 +77,12 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
 .back .panel { display: flex; flex-direction: column; justify-content: space-between; padding: 5.5cqw 4.6cqw }
 .back .panel .logo { height: 6cqw; align-self: flex-start }
 .team-title { margin: 0; font: 800 5.4cqw/1 var(--display); letter-spacing: -.02em }
-.team-title span { display: block; margin-top: 1.4cqw; font: 500 1.9cqw var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--mint-deep) }
 .back .site { position: static; color: var(--ink); border-bottom-color: var(--ink); font-size: 2.3cqw; align-self: flex-start }
 .back .site svg { color: var(--ink) }
 .back .site:hover { color: var(--mint-deep) }
 .back .turn { position: static; color: var(--mint-deep); align-self: flex-start }
 .back .turn:hover { color: var(--ink) }
-@media (prefers-reduced-motion: reduce) { .card { transition: none } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none } .aura { animation: none } }
 </style>
 </head>
 <body>
@@ -85,6 +96,7 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
 <div class="scene" id="scene">
   <div class="card">
     <section class="face front" aria-label="Mergit">
+      <div class="aura"></div><div class="dots"></div><canvas class="fx" aria-hidden="true"></canvas>
       <div class="stack">
         <img class="logo" src="assets/lockup-colour.svg" alt="Mergit">
         <div><p class="claim">AI agents that<br>do real work.<br><em>Proof you can verify.</em></p>
@@ -94,10 +106,11 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
       <div class="panel"></div>
     </section>
     <section class="face back" aria-label="The Mergit team" aria-hidden="true">
+      <div class="aura"></div><div class="dots"></div><canvas class="fx" aria-hidden="true"></canvas>
       <ul class="people" id="people"></ul>
       <div class="panel">
         <img class="logo" src="assets/lockup-black.svg" alt="Mergit">
-        <p class="team-title">The team<span>Name opens GitHub</span></p>
+        <p class="team-title">The team</p>
         <a class="site" href="https://app.mergit.site" target="_blank" rel="noopener">app.mergit.site<svg aria-hidden="true"><use href="#i-out"/></svg></a>
         <button class="turn" type="button" data-turn>Back <svg aria-hidden="true"><use href="#i-turn"/></svg></button>
       </div>
@@ -133,6 +146,81 @@ const turn = () => {
 };
 // A tap on the card turns it over, except on a link, which opens its page instead.
 document.querySelectorAll(".face").forEach((f) => f.addEventListener("click", (e) => { if (!e.target.closest("a")) turn(); }));
+
+// ---- The merge: many agent branches flow across the card and land in one verified node. ----
+// Drawn in a 350 x 200 space (the card's proportions) and scaled to the canvas.
+const NODE = { x: 290.5, y: 100 };
+const RGB = { mint: [127, 230, 192], lilac: [184, 169, 255], azure: [110, 155, 255], white: [255, 255, 255] };
+const LANES = [14, 44, 72, 100, 128, 156, 186].map((y0, i) => {
+  const rgb = [RGB.mint, RGB.lilac, RGB.white, RGB.azure][i % 4];
+  const p = [{ x: -12, y: y0 }, { x: 105 + (i % 3) * 16, y: y0 }, { x: 196, y: NODE.y }, { x: NODE.x - 11, y: NODE.y }];
+  return { rgb, p, t: -Math.random() * 1.2, speed: 0.1 + Math.random() * 0.09, dots: [0.16 + (i % 3) * 0.05, 0.42] };
+});
+const at = (p, t) => { const u = 1 - t, a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+  return { x: a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x, y: a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y }; };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const pulses = [];
+
+function paint(ctx, w, h, now, k) {            // k: how loud (1 on the front, softer behind the team list)
+  const s = w / 350;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, w, h); ctx.scale(s, s);
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (const l of LANES) {                                  // the branch lines, faint behind the text, bright near the node
+    const g = ctx.createLinearGradient(0, 0, NODE.x, 0);
+    g.addColorStop(0, rgba(l.rgb, .04 * k)); g.addColorStop(.5, rgba(l.rgb, .13 * k)); g.addColorStop(.85, rgba(l.rgb, .55 * k)); g.addColorStop(1, rgba(l.rgb, .9 * k));
+    ctx.strokeStyle = g; ctx.lineWidth = .9;
+    ctx.beginPath(); ctx.moveTo(l.p[0].x, l.p[0].y); ctx.bezierCurveTo(l.p[1].x, l.p[1].y, l.p[2].x, l.p[2].y, l.p[3].x, l.p[3].y); ctx.stroke();
+    for (const d of l.dots) { const q = at(l.p, d); ctx.fillStyle = rgba(l.rgb, (.16 + d * .5) * k); ctx.beginPath(); ctx.arc(q.x, q.y, 1.5, 0, 6.3); ctx.fill(); }
+    if (l.t > 0 && l.t < 1) {                               // a commit in flight, with a tail
+      const a = (.3 + .7 * l.t ** 1.5) * k;
+      for (let i = 12; i > 0; i--) {
+        const t0 = l.t - i * .013, t1 = l.t - (i - 1) * .013; if (t0 < 0) continue;
+        const A = at(l.p, t0), B = at(l.p, t1);
+        ctx.strokeStyle = rgba(l.rgb, a * (1 - i / 13) * .9); ctx.lineWidth = 1.7 * (1 - i / 16);
+        ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+      }
+      const q = at(l.p, l.t), r = ctx.createRadialGradient(q.x, q.y, 0, q.x, q.y, 6);
+      r.addColorStop(0, rgba(l.rgb, .7 * a)); r.addColorStop(1, rgba(l.rgb, 0));
+      ctx.fillStyle = r; ctx.beginPath(); ctx.arc(q.x, q.y, 6, 0, 6.3); ctx.fill();
+      ctx.fillStyle = rgba(RGB.white, a); ctx.beginPath(); ctx.arc(q.x, q.y, 1.7, 0, 6.3); ctx.fill();
+    }
+  }
+  let boost = 0;
+  for (const p of pulses) boost += Math.max(0, 1 - (now - p.t0) / 900) * .45;
+  const glow = ctx.createRadialGradient(NODE.x, NODE.y, 0, NODE.x, NODE.y, 52);
+  glow.addColorStop(0, rgba(RGB.mint, Math.min(.85, .38 + boost) * k)); glow.addColorStop(1, rgba(RGB.mint, 0));
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(NODE.x, NODE.y, 52, 0, 6.3); ctx.fill();
+  for (const p of pulses) {                                 // a ring leaves the node every time a branch merges
+    const a = (now - p.t0) / 1200; if (a > 1) continue;
+    ctx.strokeStyle = rgba(p.rgb, (1 - a) ** 2 * .75 * k); ctx.lineWidth = .4 + 1.3 * (1 - a);
+    ctx.beginPath(); ctx.arc(NODE.x, NODE.y, 11 + a * 36, 0, 6.3); ctx.stroke();
+  }
+  ctx.strokeStyle = rgba(RGB.mint, .4 * k); ctx.lineWidth = .6; ctx.setLineDash([1.6, 3.4]); ctx.lineDashOffset = -now * .004;
+  ctx.beginPath(); ctx.arc(NODE.x, NODE.y, 19, 0, 6.3); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = rgba(RGB.mint, .9 * k); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(NODE.x, NODE.y, 13.5, 0, 6.3); ctx.stroke();
+  const core = ctx.createRadialGradient(NODE.x - 2, NODE.y - 3, 0, NODE.x, NODE.y, 10);
+  core.addColorStop(0, "#e9fff6"); core.addColorStop(1, "#7fe6c0");
+  ctx.globalAlpha = k; ctx.fillStyle = core; ctx.beginPath(); ctx.arc(NODE.x, NODE.y, 10, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1;
+  ctx.strokeStyle = "#090b14"; ctx.lineWidth = 2; ctx.beginPath();     // the check: verified
+  ctx.moveTo(NODE.x - 4.2, NODE.y + .2); ctx.lineTo(NODE.x - 1.2, NODE.y + 3.2); ctx.lineTo(NODE.x + 4.4, NODE.y - 3.4); ctx.stroke();
+}
+
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const layers = [...document.querySelectorAll("canvas.fx")].map((cv, i) => ({ cv, ctx: cv.getContext("2d"), k: i ? .42 : 1 }));
+const fit = () => layers.forEach((L) => { const d = Math.min(devicePixelRatio || 1, 2);
+  L.cv.width = Math.round(L.cv.clientWidth * d); L.cv.height = Math.round(L.cv.clientHeight * d); });
+let last = 0;
+const frame = (now) => {
+  const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
+  for (const l of LANES) { l.t += l.speed * dt; if (l.t >= 1) { pulses.push({ t0: now, rgb: l.rgb }); l.t = -Math.random() * 1.4; l.speed = .1 + Math.random() * .09; } }
+  while (pulses.length && now - pulses[0].t0 > 1300) pulses.shift();
+  layers.forEach((L) => paint(L.ctx, L.cv.width, L.cv.height, now, L.k));
+  if (!calm) requestAnimationFrame(frame);
+};
+new ResizeObserver(() => { fit(); if (calm) frame(0); }).observe(document.getElementById("scene"));
+fit();
+if (calm) { LANES.forEach((l, i) => { l.t = .3 + i * .09; }); frame(0); } else requestAnimationFrame(frame);
 </script>
 </body>
 </html>
