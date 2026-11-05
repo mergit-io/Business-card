@@ -59,14 +59,13 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
 .person { display: flex; align-items: center; gap: 2cqw; border-bottom: .2cqw solid rgb(255 255 255 / .09); min-width: 0 }
 .person:last-child { border-bottom: 0 }
 .name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .3cqw; color: var(--paper); text-decoration: none }
-.name b { font: 600 3.4cqw/1.1 var(--sans); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.name b { font: 600 3.1cqw/1.1 var(--sans); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .name span { font: 400 2.1cqw var(--mono); color: var(--paper-3) }
 .name:hover b { color: var(--mint) }
-.icons { display: flex; gap: 1.4cqw; flex: none }
-.icons a { width: 6.2cqw; height: 6.2cqw; border-radius: 50%; display: grid; place-items: center; color: var(--paper);
-  border: .25cqw solid rgb(255 255 255 / .22); transition: background-color .2s ease, color .2s ease, border-color .2s ease }
+.icons { display: flex; gap: 1.2cqw; flex: none }
+.icons a { height: 5.2cqw; padding: 0 1.8cqw; border-radius: 2.6cqw; display: grid; place-items: center; color: var(--paper); text-decoration: none;
+  font: 500 1.9cqw var(--mono); letter-spacing: .02em; border: .25cqw solid rgb(255 255 255 / .22); transition: background-color .2s ease, color .2s ease, border-color .2s ease }
 .icons a:hover { background: var(--mint); border-color: var(--mint); color: var(--ink) }
-.icons svg { width: 2.7cqw; height: 2.7cqw }
 .back .panel { display: flex; flex-direction: column; justify-content: space-between; padding: 5.5cqw 4.6cqw }
 .back .panel .lockup { position: static }
 .back .panel .lockup { gap: 1.6cqw }
@@ -124,21 +123,21 @@ a:focus-visible, .turn:focus-visible { outline: .5cqw solid var(--mint); outline
 <script>
 // Where the printed card's QR points.
 const CARD_URL = "https://app.mergit.site";
-// Placeholders: the five real members. An empty handle links to that site's home page.
+// The five members. Handles only; the links are built below.
 const TEAM = [
-  { name: "Member One",   role: "Co-founder",    github: "", x: "", linkedin: "" },
-  { name: "Member Two",   role: "Control plane", github: "", x: "", linkedin: "" },
-  { name: "Member Three", role: "Runtime",       github: "", x: "", linkedin: "" },
-  { name: "Member Four",  role: "Frontend",      github: "", x: "", linkedin: "" },
-  { name: "Member Five",  role: "Research",      github: "", x: "", linkedin: "" },
+  { name: "Yash Virulkar",       role: "Co-founder", github: "viscous106",        x: "viscous106",      linkedin: "yash-virulkar" },
+  { name: "Abhinav Singh",       role: "Co-founder", github: "officialAbhinavSingh", x: "zenitsu_uchiha1", linkedin: "abhinavsingh7" },
+  { name: "Soham Gangopadhyay",  role: "Team",       github: "Aspirant200715",    x: "Seriousaspurant", linkedin: "soham-gangopadhyay-b47519368" },
+  { name: "Divyanshi Saini",     role: "Team",       github: "divyanshisaini100", x: "divyanshisfj",    linkedin: "divyanshisaini100" },
+  { name: "Divijaa Arjun",       role: "Team",       github: "divii2205",         x: "Divii2205",       linkedin: "divijaa-arjun" },
 ];
 const link = (base, handle) => base + (handle ? encodeURIComponent(handle) : "");
 document.getElementById("people").innerHTML = TEAM.map((m) => `
   <li class="person">
     <a class="name" href="${link("https://github.com/", m.github)}" target="_blank" rel="noopener"><b>${m.name}</b><span>${m.role}</span></a>
     <span class="icons">
-      <a href="${link("https://x.com/", m.x)}" target="_blank" rel="noopener" aria-label="${m.name} on X"><svg><use href="#i-x"/></svg></a>
-      <a href="${link("https://www.linkedin.com/in/", m.linkedin)}" target="_blank" rel="noopener" aria-label="${m.name} on LinkedIn"><svg><use href="#i-in"/></svg></a>
+      <a href="${link("https://x.com/", m.x)}" target="_blank" rel="noopener" aria-label="${m.name} on X">X</a>
+      <a href="${link("https://www.linkedin.com/in/", m.linkedin)}" target="_blank" rel="noopener" aria-label="${m.name} on LinkedIn">LinkedIn</a>
     </span>
   </li>`).join("");
 if (window.QRCode) new QRCode(document.getElementById("qr"), { text: CARD_URL, width: 200, height: 200, colorDark: "#090b14", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
