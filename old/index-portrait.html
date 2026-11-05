@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mergit Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Onest:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Only the card, face on. The front is the company; tap it and it turns over to the team on the back. */
+:root {
+  --night: #141725; --night-2: #1e2236; --stock: #f4f5f7; --ink: #151826; --ink-3: #8a90a0; --rule: #e3e5ea;
+  --mint: #bfeedd; --sky: #c9dcf5; --lilac: #d8d1fb; --lilac-2: #b6aaf2; --gold: #d8bf88;
+  --room: #1b1d27;
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; background: var(--room); font-family: var(--sans); display: grid; place-items: center; padding: 16px }
+
+/* A portrait card, 2 x 3.5, as large as the screen allows. */
+.scene { width: min(90vw, calc(92dvh * 2 / 3.5), 420px); aspect-ratio: 2 / 3.5; perspective: 1600px }
+.card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .9s cubic-bezier(.3,.7,.2,1); cursor: pointer }
+.flipped .card { transform: rotateY(180deg) }
+.face { position: absolute; inset: 0; border-radius: 22px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  box-shadow: 0 40px 70px -30px rgb(0 0 0 / .7), 0 2px 0 rgb(255 255 255 / .04) inset }
+.face.back { transform: rotateY(180deg) }
+.turn { position: absolute; right: 16px; top: 16px; width: 34px; height: 34px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; z-index: 2 }
+.turn svg { width: 16px; height: 16px }
+.turn:focus-visible, .card a:focus-visible { outline: 2px solid var(--lilac-2); outline-offset: 3px }
+
+/* ---------- front ---------- */
+.front { background: linear-gradient(165deg, var(--night-2), var(--night) 70%); color: #eef0f6 }
+.front::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(90% 50% at 15% 0%, rgb(191 238 221 / .10), transparent 65%), radial-gradient(80% 40% at 100% 100%, rgb(182 170 242 / .14), transparent 70%) }
+.front .turn { background: rgb(255 255 255 / .08); color: #c9cde0 }
+.brand { position: absolute; left: 11%; right: 11%; top: 16%; display: flex; flex-direction: column; gap: 14px }
+.brand svg.logo { width: 62px; height: 62px }
+.word { font: 600 clamp(30px, 9.5vw, 40px)/1 var(--serif); letter-spacing: .3em; margin: 6px 0 0 }
+.sub { font: 500 9.5px var(--sans); letter-spacing: .36em; color: var(--gold) }
+.thesis { margin: 18px 0 0; font: 500 italic clamp(17px, 4.8vw, 21px)/1.3 var(--serif); color: #c3c7d8; max-width: 18ch }
+.tab { position: absolute; right: 0; bottom: 11%; width: 60%; padding: 16px 18px; border-radius: 22px 0 0 22px; background: var(--lilac);
+  display: flex; align-items: center; gap: 14px; color: var(--ink) }
+.tab .qr { background: #fff; padding: 5px; border-radius: 8px; line-height: 0; flex: none }
+.tab .qr img, .tab .qr canvas { width: 66px !important; height: 66px !important; display: block }
+.tab span { font: 500 10px/1.5 var(--mono); letter-spacing: .04em }
+.foot { position: absolute; left: 11%; bottom: 4.5%; font: 400 9.5px var(--mono); letter-spacing: .1em; color: #868ca3; text-transform: uppercase }
+
+/* ---------- back: the team ---------- */
+.back { background: var(--stock); color: var(--ink); padding: 11% 9% 8% 15% }
+.back::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5.5%; background: var(--lilac-2) }
+.back .turn { background: #e6e8ed; color: var(--ink) }
+.back header { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--rule) }
+.back header svg { width: 34px; height: 34px; flex: none }
+.back header b { display: block; font: 600 19px/1 var(--serif); letter-spacing: .26em }
+.back header span { font: 500 8.5px var(--sans); letter-spacing: .34em; color: #8277d4 }
+.people { list-style: none; margin: 6px 0 0; padding: 0 }
+.person { display: flex; align-items: center; gap: 10px; padding: clamp(10px, 2.6dvh, 15px) 0; border-bottom: 1px solid var(--rule) }
+.person:last-child { border-bottom: 0 }
+.name { flex: 1; min-width: 0; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 2px }
+.name b { font: 500 clamp(14px, 4.1vw, 16px) var(--sans); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.name span { font: 400 10.5px var(--mono); color: var(--ink-3) }
+.name:hover b { text-decoration: underline; text-underline-offset: 3px }
+.icons { display: flex; gap: 6px; flex: none }
+.icons a { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: #e6e8ed; transition: background-color .2s ease, color .2s ease }
+.icons a:hover { background: var(--ink); color: var(--stock) }
+.icons svg { width: 14px; height: 14px }
+.bands { position: absolute; right: 0; bottom: 6%; display: flex; flex-direction: column; align-items: flex-end; gap: 5px }
+.bands i { display: block; height: 8px; border-radius: 8px 0 0 8px }
+.bands i:nth-child(1) { width: 92px; background: var(--mint) } .bands i:nth-child(2) { width: 68px; background: var(--sky) } .bands i:nth-child(3) { width: 44px; background: var(--lilac) }
+@media (prefers-reduced-motion: reduce) { .card { transition: none } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="mg-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bdf3dd"/><stop offset="1" stop-color="#7fe0bb"/></linearGradient>
+  <linearGradient id="mg-bot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9d2ff"/><stop offset="1" stop-color="#b3a4ff"/></linearGradient>
+  <symbol id="mg" viewBox="0 0 256 256">
+    <path fill="url(#mg-top)" d="M52 16L180 16A36 36 0 0 1 180 88L175.17 88A8 8 0 0 1 168.31 84.13L141.69 39.95A16 16 0 0 0 114.28 39.95L87.66 84.13A8 8 0 0 1 80.8 88L52 88A36 36 0 0 1 52 16Z"/>
+    <path fill="url(#mg-bot)" d="M76 240L204 240A36 36 0 0 0 204 168L179.99 168A8 8 0 0 0 173.47 171.37L141.03 217.05A16 16 0 0 1 114.94 217.05L82.52 171.37A8 8 0 0 0 76 168A36 36 0 0 0 76 240Z"/>
+    <path fill="#7DE3BE" d="M127.99 48.21L79.01 129.48L127.99 107.22Z"/><path fill="#A9EED5" d="M127.99 48.21L127.99 107.22L176.97 129.48Z"/>
+    <path fill="#3CCB98" d="M79.01 129.48L127.99 158.43L127.99 107.22Z"/><path fill="#62B8E6" d="M127.99 107.22L127.99 158.43L176.97 129.48Z"/>
+    <path fill="#8FA2F6" d="M127.99 167.71L127.99 207.79L79.01 138.77Z"/><path fill="#B19FFF" d="M127.99 167.71L176.99 138.77L127.99 207.79Z"/>
+  </symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z" fill="currentColor"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3V9.75zM9.5 9.75h3.8v1.6h.06c.53-1 1.84-2.06 3.78-2.06 4.04 0 4.79 2.66 4.79 6.12V21h-4v-4.97c0-1.19-.02-2.71-1.65-2.71-1.65 0-1.9 1.29-1.9 2.62V21h-4V9.75z" fill="currentColor"/></symbol>
+  <symbol id="i-turn" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.3-6.4L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.3 6.4L3 16M3 21v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
+<div class="scene" id="scene">
+  <div class="card" id="card">
+    <section class="face front" aria-label="Mergit">
+      <button class="turn" type="button" data-turn aria-label="Turn the card over to see the team"><svg><use href="#i-turn"/></svg></button>
+      <div class="brand">
+        <svg class="logo" aria-hidden="true"><use href="#mg"/></svg>
+        <p class="word">MERGIT</p>
+        <span class="sub">VERIFIABLE AGENT WORK</span>
+        <p class="thesis">AI agents that do real work. Proof you can verify.</p>
+      </div>
+      <div class="tab"><div class="qr" id="qr"></div><span>mergit.site<br>Base Sepolia</span></div>
+      <span class="foot">Tap to meet the team</span>
+    </section>
+    <section class="face back" aria-label="The Mergit team" aria-hidden="true">
+      <button class="turn" type="button" data-turn aria-label="Turn the card back over"><svg><use href="#i-turn"/></svg></button>
+      <header><svg aria-hidden="true"><use href="#mg"/></svg><div><b>MERGIT</b><span>THE TEAM</span></div></header>
+      <ul class="people" id="people"></ul>
+      <div class="bands" aria-hidden="true"><i></i><i></i><i></i></div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// The page the printed card's QR opens. Replace before printing.
+const CARD_URL = "https://mergit.site";
+// Placeholders: the five real members. An empty handle links to that site's home page.
+const TEAM = [
+  { name: "Member One",   role: "Co-founder",    github: "", x: "", linkedin: "" },
+  { name: "Member Two",   role: "Control plane", github: "", x: "", linkedin: "" },
+  { name: "Member Three", role: "Runtime",       github: "", x: "", linkedin: "" },
+  { name: "Member Four",  role: "Frontend",      github: "", x: "", linkedin: "" },
+  { name: "Member Five",  role: "Research",      github: "", x: "", linkedin: "" },
+];
+const link = (base, handle) => base + (handle ? encodeURIComponent(handle) : "");
+document.getElementById("people").innerHTML = TEAM.map((m) => `
+  <li class="person">
+    <a class="name" href="${link("https://github.com/", m.github)}" target="_blank" rel="noopener"><b>${m.name}</b><span>${m.role}</span></a>
+    <span class="icons">
+      <a href="${link("https://x.com/", m.x)}" target="_blank" rel="noopener" aria-label="${m.name} on X"><svg><use href="#i-x"/></svg></a>
+      <a href="${link("https://www.linkedin.com/in/", m.linkedin)}" target="_blank" rel="noopener" aria-label="${m.name} on LinkedIn"><svg><use href="#i-in"/></svg></a>
+    </span>
+  </li>`).join("");
+if (window.QRCode) new QRCode(document.getElementById("qr"), { text: CARD_URL, width: 160, height: 160, colorDark: "#141725", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+
+const scene = document.getElementById("scene");
+const [front, back] = document.querySelectorAll(".face");
+const turn = () => {
+  const flipped = scene.classList.toggle("flipped");
+  front.setAttribute("aria-hidden", String(flipped));
+  back.setAttribute("aria-hidden", String(!flipped));
+};
+// The front turns over on any tap; on the back only the turn button does, so the links work.
+front.addEventListener("click", turn);
+back.querySelector("[data-turn]").addEventListener("click", (e) => { e.stopPropagation(); turn(); });
+</script>
+</body>
+</html>

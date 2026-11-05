@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mergit Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Onest:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Opened by scanning the printed card on a phone. Page 1: the card pair in 3D. Page 2: the team. */
+:root {
+  --night: #151826;      /* front of the card */
+  --night-2: #1d2133;
+  --stock: #f3f4f6;      /* back of the card */
+  --ink: #12141d; --ink-2: #5a6070; --ink-3: #8b91a0;
+  --mint: #bfeedd; --mint-2: #8fdcc0; --sky: #c7dcf6; --lilac: #d6cffb; --lilac-2: #b8adf2;
+  --gold: #d9c08a;
+  --room: #202330;       /* the surface the cards lie on */
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; background: radial-gradient(120% 80% at 50% 0%, #2a2e3e, var(--room) 60%, #181a24); color: #eceef3; font-family: var(--sans); overflow: hidden }
+.app { position: relative; height: 100%; max-width: 520px; margin: 0 auto }
+.view { position: absolute; inset: 0; display: flex; flex-direction: column; padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  transition: transform .6s cubic-bezier(.2,.7,.2,1), opacity .4s ease }
+.view.team { justify-content: flex-start; transform: translateX(100%); opacity: 0; pointer-events: none }
+.on-team .view.home { transform: translateX(-25%); opacity: 0; pointer-events: none }
+.on-team .view.team { justify-content: flex-start; transform: none; opacity: 1; pointer-events: auto }
+.bar { display: flex; align-items: center; justify-content: space-between; font: 500 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #8d92a3 }
+.dots { display: flex; gap: 6px } .dots i { width: 6px; height: 6px; border-radius: 50%; background: #4a4e60 } .dots i.on { background: var(--mint-2) }
+
+/* ---------- 3D table ---------- */
+.table { flex: 1; display: grid; place-items: center; perspective: 1400px; min-height: 0 }
+.pair { position: relative; width: min(64vw, 300px); aspect-ratio: 3.5 / 2; transform-style: preserve-3d;
+  transform: rotateX(40deg) rotateZ(-22deg); animation: settle 1.4s cubic-bezier(.2,.7,.2,1) both }
+@keyframes settle { from { transform: rotateX(40deg) rotateZ(-22deg) translateZ(60px); opacity: 0 } }
+.card { position: absolute; inset: 0; border-radius: 16px; overflow: hidden }
+/* the stack edge: one hairline shadow per sheet, then the cast shadow on the table */
+.front { transform: translate3d(-12%, -40%, 0);
+  box-shadow: 0 1px 0 #10121c, 0 2px 0 #0f111a, 0 3px 0 #10121c, 0 4px 0 #0e1019, 0 5px 0 #10121c, 0 6px 0 #0d0f17,
+              0 7px 0 #0f111a, 0 8px 0 #0c0e16, 0 30px 40px -6px rgb(0 0 0 / .55) }
+.back { transform: translate3d(12%, 40%, 0);
+  box-shadow: 0 1px 0 #dcdee3, 0 2px 0 #c9ccd3, 0 3px 0 #dcdee3, 0 4px 0 #c6c9d0, 0 5px 0 #dadce1, 0 6px 0 #c3c6cd,
+              0 7px 0 #d7d9de, 0 8px 0 #bfc2c9, 0 9px 0 #d4d6db, 0 10px 0 #bcbfc6, 0 34px 44px -8px rgb(0 0 0 / .5) }
+.pair:hover { animation: none; transform: rotateX(34deg) rotateZ(-18deg) }
+.pair { transition: transform .8s cubic-bezier(.2,.7,.2,1) }
+
+/* front: night stock, the logo and a mint tab that holds the QR */
+.front { background: linear-gradient(160deg, var(--night-2), var(--night)) }
+.front::after { content: ""; position: absolute; inset: 0; background: radial-gradient(80% 60% at 20% 10%, rgb(255 255 255 / .06), transparent 60%); pointer-events: none }
+.tab { position: absolute; right: 0; top: 9%; width: 44%; height: 50%; border-radius: 18px 0 0 18px; background: var(--lilac);
+  display: grid; place-items: center }
+.tab .qr { background: #fff; padding: 5px; border-radius: 6px; line-height: 0 }
+.tab .qr img, .tab .qr canvas { width: 62px !important; height: 62px !important; display: block }
+.mark { position: absolute; left: 9%; bottom: 13%; display: flex; flex-direction: column; gap: 3px }
+.mark svg { width: 34px; height: 34px; margin-bottom: 4px }
+.mark b { font: 600 19px/1 var(--serif); letter-spacing: .28em; color: #f1f2f6 }
+.mark span { font: 500 7px var(--sans); letter-spacing: .34em; color: var(--gold) }
+.addr { position: absolute; left: 9%; bottom: 5%; font: 400 6.5px var(--mono); letter-spacing: .06em; color: #8f94a8 }
+
+/* back: light stock, a lilac side band and stacked contact bands */
+.back { background: var(--stock); color: var(--ink) }
+.band { position: absolute; left: 0; top: 0; bottom: 0; width: 6%; background: var(--lilac-2); border-radius: 0 0 0 0 }
+.back .mark { left: 13%; bottom: auto; top: 50%; transform: translateY(-50%) }
+.back .mark b { color: #2b2f43; font-size: 17px } .back .mark span { color: #8b7fd6 }
+.lines { position: absolute; right: 0; top: 14%; width: 50%; display: flex; flex-direction: column; gap: 4px }
+.line { display: flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 12px 0 0 12px; font: 400 7.5px var(--sans); color: #2b2f43 }
+.line svg { width: 10px; height: 10px; flex: none }
+.line:nth-child(1) { background: var(--mint) } .line:nth-child(2) { background: var(--sky); margin-left: 8% } .line:nth-child(3) { background: var(--lilac); margin-left: 16% }
+.line b { font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 7px }
+
+.intro { text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center }
+.intro h1 { margin: 0; font: 500 30px/1.1 var(--serif); letter-spacing: .01em; text-wrap: balance }
+.intro p { margin: 0; color: #a5aabb; font-size: 14px; line-height: 1.5; max-width: 32ch }
+.cta { margin-top: 18px; width: 100%; border: 0; border-radius: 14px; padding: 15px; font: 600 15px var(--sans); color: var(--night);
+  background: var(--stock); cursor: pointer; display: flex; justify-content: center; gap: 8px; align-items: center }
+.cta:focus-visible, a:focus-visible, .back-btn:focus-visible { outline: 2px solid var(--mint-2); outline-offset: 3px }
+
+/* ---------- page 2: the team, printed on the back stock ---------- */
+.back-btn { align-self: flex-start; background: none; border: 0; color: #a5aabb; font: 500 13px var(--sans); padding: 4px 0; cursor: pointer; display: inline-flex; gap: 6px; align-items: center }
+.sheet { margin-top: 18px; flex: 0 1 auto; min-height: 0; overflow-y: auto; background: var(--stock); color: var(--ink); border-radius: 22px; position: relative;
+  padding: 26px 22px 18px 34px; box-shadow: 0 1px 0 #d7d9de, 0 2px 0 #c6c9d0, 0 3px 0 #d4d6db, 0 4px 0 #c1c4cb, 0 30px 50px -20px rgb(0 0 0 / .6) }
+.sheet::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: var(--lilac-2) }
+.sheet header { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid #e1e3e8 }
+.sheet header svg { width: 30px; height: 30px; flex: none }
+.sheet header b { display: block; font: 600 18px/1 var(--serif); letter-spacing: .24em }
+.sheet header span { font: 500 9px var(--sans); letter-spacing: .3em; color: #8b7fd6 }
+.people { list-style: none; margin: 0; padding: 0 }
+.person { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #e6e8ec }
+.person:last-child { border-bottom: 0 }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none }
+.name { flex: 1; min-width: 0; display: flex; flex-direction: column; text-decoration: none; color: var(--ink) }
+.name b { font: 500 16px var(--sans); letter-spacing: -.01em }
+.name span { font: 400 11px var(--mono); color: var(--ink-3) }
+.name:hover b { text-decoration: underline; text-underline-offset: 3px }
+.icons { display: flex; gap: 6px; flex: none }
+.icons a { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #2b2f43; background: #e7e9ee; transition: background-color .2s ease, color .2s ease }
+.icons a:hover { background: #2b2f43; color: #f3f4f6 }
+.icons svg { width: 15px; height: 15px }
+.foot { margin-top: 12px; font: 400 10px var(--mono); color: var(--ink-3); letter-spacing: .06em; text-align: center }
+@media (prefers-reduced-motion: reduce) { .view, .pair, .icons a { transition: none } .pair { animation: none } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="mg-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bdf3dd"/><stop offset="1" stop-color="#7fe0bb"/></linearGradient>
+  <linearGradient id="mg-bot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9d2ff"/><stop offset="1" stop-color="#b3a4ff"/></linearGradient>
+  <symbol id="mg" viewBox="0 0 256 256">
+    <path fill="url(#mg-top)" d="M52 16L180 16A36 36 0 0 1 180 88L175.17 88A8 8 0 0 1 168.31 84.13L141.69 39.95A16 16 0 0 0 114.28 39.95L87.66 84.13A8 8 0 0 1 80.8 88L52 88A36 36 0 0 1 52 16Z"/>
+    <path fill="url(#mg-bot)" d="M76 240L204 240A36 36 0 0 0 204 168L179.99 168A8 8 0 0 0 173.47 171.37L141.03 217.05A16 16 0 0 1 114.94 217.05L82.52 171.37A8 8 0 0 0 76 168A36 36 0 0 0 76 240Z"/>
+    <path fill="#7DE3BE" d="M127.99 48.21L79.01 129.48L127.99 107.22Z"/><path fill="#A9EED5" d="M127.99 48.21L127.99 107.22L176.97 129.48Z"/>
+    <path fill="#3CCB98" d="M79.01 129.48L127.99 158.43L127.99 107.22Z"/><path fill="#62B8E6" d="M127.99 107.22L127.99 158.43L176.97 129.48Z"/>
+    <path fill="#8FA2F6" d="M127.99 167.71L127.99 207.79L79.01 138.77Z"/><path fill="#B19FFF" d="M127.99 167.71L176.99 138.77L127.99 207.79Z"/>
+  </symbol>
+  <symbol id="i-web" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z" fill="currentColor"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3V9.75zM9.5 9.75h3.8v1.6h.06c.53-1 1.84-2.06 3.78-2.06 4.04 0 4.79 2.66 4.79 6.12V21h-4v-4.97c0-1.19-.02-2.71-1.65-2.71-1.65 0-1.9 1.29-1.9 2.62V21h-4V9.75z" fill="currentColor"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg>
+<div class="app" id="app">
+  <section class="view home" aria-label="Mergit card">
+    <div class="bar"><span>mergit.site</span><span class="dots"><i class="on"></i><i></i></span></div>
+    <div class="table">
+      <div class="pair" aria-hidden="true">
+        <div class="card back">
+          <div class="band"></div>
+          <div class="mark"><svg><use href="#mg"/></svg><b>MERGIT</b><span>VERIFIABLE AGENT WORK</span></div>
+          <div class="lines">
+            <div class="line"><svg><use href="#i-web"/></svg>mergit.site</div>
+            <div class="line"><svg><use href="#i-mail"/></svg>hello@mergit.site</div>
+            <div class="line"><svg><use href="#i-chain"/></svg><b>Base Sepolia</b></div>
+          </div>
+        </div>
+        <div class="card front">
+          <div class="tab"><div class="qr" id="qr"></div></div>
+          <div class="mark"><svg><use href="#mg"/></svg><b>MERGIT</b><span>VERIFIABLE AGENT WORK</span></div>
+          <div class="addr">Receipts on chain · paid after verification</div>
+        </div>
+      </div>
+    </div>
+    <div class="intro">
+      <h1>AI agents that do real work. Proof you can verify.</h1>
+      <p>Every task leaves a receipt on chain, and payment waits until the work is verified.</p>
+      <button class="cta" id="to-team" type="button">Meet the team <svg width="16" height="16"><use href="#i-right"/></svg></button>
+    </div>
+  </section>
+
+  <section class="view team" aria-label="The Mergit team" aria-hidden="true">
+    <div class="bar"><button class="back-btn" id="to-home" type="button"><svg width="14" height="14"><use href="#i-left"/></svg> Card</button><span class="dots"><i></i><i class="on"></i></span></div>
+    <div class="sheet">
+      <header><svg><use href="#mg"/></svg><div><b>MERGIT</b><span>THE TEAM</span></div></header>
+      <ul class="people" id="people"></ul>
+      <p class="foot">Tap a name for GitHub</p>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// The page the printed card's QR opens. Replace with the real address before printing.
+const CARD_URL = "https://mergit.site";
+// Placeholders: put in the five real members. Leave a handle empty and its link opens that site's home page.
+const TEAM = [
+  { name: "Member One",   role: "Co-founder", github: "", x: "", linkedin: "" },
+  { name: "Member Two",   role: "Control plane", github: "", x: "", linkedin: "" },
+  { name: "Member Three", role: "Runtime", github: "", x: "", linkedin: "" },
+  { name: "Member Four",  role: "Frontend", github: "", x: "", linkedin: "" },
+  { name: "Member Five",  role: "Research", github: "", x: "", linkedin: "" },
+];
+const DOTS = ["#8fdcc0", "#9cc2f0", "#b8adf2", "#e7c58a", "#f0a9bd"];
+const url = (base, handle) => base + (handle ? encodeURIComponent(handle) : "");
+
+document.getElementById("people").innerHTML = TEAM.map((m, i) => `
+  <li class="person">
+    <span class="dot" style="background:${DOTS[i % DOTS.length]}"></span>
+    <a class="name" href="${url("https://github.com/", m.github)}" target="_blank" rel="noopener">
+      <b>${m.name}</b><span>${m.role}${m.github ? " · @" + m.github : ""}</span>
+    </a>
+    <span class="icons">
+      <a href="${url("https://x.com/", m.x)}" target="_blank" rel="noopener" aria-label="${m.name} on X"><svg><use href="#i-x"/></svg></a>
+      <a href="${url("https://www.linkedin.com/in/", m.linkedin)}" target="_blank" rel="noopener" aria-label="${m.name} on LinkedIn"><svg><use href="#i-in"/></svg></a>
+    </span>
+  </li>`).join("");
+
+if (window.QRCode) new QRCode(document.getElementById("qr"), { text: CARD_URL, width: 160, height: 160, colorDark: "#151826", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+
+const app = document.getElementById("app");
+const [home, team] = app.querySelectorAll(".view");
+const go = (toTeam) => {
+  app.classList.toggle("on-team", toTeam);
+  team.setAttribute("aria-hidden", String(!toTeam));
+  home.setAttribute("aria-hidden", String(toTeam));
+};
+document.getElementById("to-team").onclick = () => go(true);
+document.getElementById("to-home").onclick = () => go(false);
+</script>
+</body>
+</html>
